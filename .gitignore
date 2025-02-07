@@ -4,3 +4,4 @@ versions/
 ~$yearly_calendar.xlsx
 .DS_Store
 myenv/
+venv/
