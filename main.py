@@ -9,26 +9,32 @@ def main():
     root = tk.Tk()
     root.title("Excel Yearly Calendar")
 
-    # Load default configuration from resources/default_settings.ini
+    # Ensure the saved_settings folder exists
+    saved_settings_folder = os.path.join(os.getcwd(), "saved_settings")
+    if not os.path.exists(saved_settings_folder):
+        os.makedirs(saved_settings_folder)
+
+    # Load default config from resources/default_settings.ini if available;
+    # otherwise use the default config.
     default_config_path = os.path.join("resources", "default_settings.ini")
     if os.path.exists(default_config_path):
         config = config_manager.load_config(default_config_path)
     else:
         config = config_manager.default_config()
 
-    def select_project():
+    def load_settings_action():
         nonlocal config
-        project_path = project_selector.select_project()
-        if project_path:
-            config = config_manager.load_config(project_path)
-            messagebox.showinfo("Project Loaded", f"Loaded project from {project_path}")
+        new_config = project_selector.load_settings(root)
+        if new_config:
+            config = new_config
+            messagebox.showinfo("Settings Loaded", "Settings have been loaded.")
 
-    def edit_settings():
+    def edit_settings_action():
         nonlocal config
         new_config = settings_editor.edit_settings(root, config)
         if new_config:
             config = new_config
-            messagebox.showinfo("Settings Saved", "Settings have been updated.")
+            messagebox.showinfo("Settings Saved", "Settings have been saved.")
 
     def generate_calendar_action():
         input_file = filedialog.askopenfilename(
@@ -50,12 +56,11 @@ def main():
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    # Main window buttons
-    btn_select_project = tk.Button(root, text="Select Project", command=select_project)
-    btn_select_project.pack(pady=5)
+    btn_load = tk.Button(root, text="Load Settings", command=load_settings_action)
+    btn_load.pack(pady=5)
 
-    btn_edit_settings = tk.Button(root, text="Edit Settings", command=edit_settings)
-    btn_edit_settings.pack(pady=5)
+    btn_edit = tk.Button(root, text="Edit Settings", command=edit_settings_action)
+    btn_edit.pack(pady=5)
 
     btn_generate = tk.Button(root, text="Generate Calendar", command=generate_calendar_action)
     btn_generate.pack(pady=5)

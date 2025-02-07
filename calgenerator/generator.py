@@ -6,20 +6,20 @@ from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 def generate_calendar(input_file, output_file, config):
-    # Extract settings from config
+    # Extract settings from config.
     title = config.get("GENERAL", {}).get("TITLE", None)
     column_width = float(config.get("GENERAL", {}).get("COLUMN_WIDTH", 4.5))
     phase_colors = config.get("PHASE_COLORS", {})
     row_heights = config.get("ROW_HEIGHTS", {"normal": "20", "special": "50"})
 
-    # Normalize phase keys and convert row heights to floats
+    # Normalize phase keys and convert row heights to floats.
     phase_colors = {k.strip().lower(): v for k, v in phase_colors.items()}
     row_heights = {k.lower(): float(v) for k, v in row_heights.items()}
 
-    # Read the input Excel file
+    # Read the input Excel file.
     df = pd.read_excel(input_file)
 
-    # Convert 'Start' and 'End' to datetime
+    # Convert 'Start' and 'End' to datetime.
     df['Start'] = pd.to_datetime(df['Start'], dayfirst=True, errors='coerce')
     df['End'] = pd.to_datetime(df['End'], dayfirst=True, errors='coerce')
     df = df.dropna(subset=['Start'])
@@ -32,7 +32,7 @@ def generate_calendar(input_file, output_file, config):
     ws = wb.active
     ws.title = "Yearly Calendar"
 
-    # Define styles
+    # Define styles.
     title_font = Font(bold=True, size=24)
     year_header_font = Font(bold=True, color='FFFFFF', size=20)
     year_header_fill = PatternFill(start_color='000000', end_color='000000', fill_type='solid')
@@ -51,7 +51,7 @@ def generate_calendar(input_file, output_file, config):
         bottom=Side(border_style="thin", color="000000")
     )
 
-    # Set column widths for 48 columns
+    # Set column widths for 48 columns.
     for col in range(1, 49):
         ws.column_dimensions[get_column_letter(col)].width = column_width
 
@@ -101,7 +101,7 @@ def generate_calendar(input_file, output_file, config):
             else:
                 long_events.append(event)
 
-        # Assign long events to rows avoiding overlaps
+        # Assign long events to rows avoiding overlaps.
         rows_assigned = []
         for event in long_events:
             assigned = False
@@ -113,7 +113,7 @@ def generate_calendar(input_file, output_file, config):
             if not assigned:
                 rows_assigned.append([event])
 
-        # Year header row
+        # Year header row.
         year_cell = ws.cell(row=current_row, column=1, value=str(year))
         year_cell.font = year_header_font
         year_cell.fill = year_header_fill
@@ -124,7 +124,7 @@ def generate_calendar(input_file, output_file, config):
         ws.row_dimensions[current_row].height = 30
         current_row += 1
 
-        # Month header row
+        # Month header row.
         col = 1
         for ym in months:
             month_name = calendar.month_name[ym[1]]
@@ -139,7 +139,7 @@ def generate_calendar(input_file, output_file, config):
         ws.row_dimensions[current_row].height = 20
         current_row += 1
 
-        # Week header row
+        # Week header row.
         col = 1
         for _ in months:
             for week in range(1, 5):
@@ -152,7 +152,7 @@ def generate_calendar(input_file, output_file, config):
         ws.row_dimensions[current_row].height = 15
         current_row += 1
 
-        # Long events rows
+        # Long events rows.
         normal_height = row_heights.get("normal", 20)
         for events_row in rows_assigned:
             for col in range(1, 49):
@@ -181,7 +181,7 @@ def generate_calendar(input_file, output_file, config):
             ws.row_dimensions[current_row].height = normal_height
             current_row += 1
 
-        # Special row for short events
+        # Special row for short events.
         if short_events:
             for col in range(1, 49):
                 ws.cell(row=current_row, column=col).border = thin_border
@@ -210,10 +210,10 @@ def generate_calendar(input_file, output_file, config):
             ws.row_dimensions[current_row].height = special_height
             current_row += 1
 
-        # Blank row between years
+        # Blank row between years.
         current_row += 1
 
-    # Legend at bottom
+    # Legend at the bottom.
     legend_start = current_row + 1
     legend_col = 1
     legend_title = ws.cell(row=legend_start, column=legend_col, value="Legend:")
